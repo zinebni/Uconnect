@@ -26,7 +26,15 @@ class PostController extends Controller
     $followingIds = $user->following()->pluck('following_id')->toBase();
     $followingIds->push($user->id);
 
-    $posts = Post::with(['user', 'likes', 'comments.user'])
+    $posts = Post::with([
+            'user',
+            'likes',
+            'comments' => function($query) {
+                $query->whereNull('parent_id') // Seulement les commentaires principaux
+                      ->with(['user', 'likes', 'replies.user', 'replies.likes'])
+                      ->orderBy('created_at', 'desc');
+            }
+        ])
         ->whereIn('user_id', $followingIds)
         ->latest()
         ->paginate(10);
@@ -56,8 +64,16 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        // Charger les relations nécessaires
-        $post->load(['user', 'likes', 'comments.user']);
+        // Charger les relations nécessaires avec les réponses
+        $post->load([
+            'user',
+            'likes',
+            'comments' => function($query) {
+                $query->whereNull('parent_id') // Seulement les commentaires principaux
+                      ->with(['user', 'likes', 'replies.user', 'replies.likes'])
+                      ->orderBy('created_at', 'desc');
+            }
+        ]);
 
         // Vérifier que l'utilisateur peut voir ce post
         // (soit c'est son post, soit il suit l'auteur, soit le post est public)
@@ -244,33 +260,39 @@ class PostController extends Controller
      */
     public function getLikes(Request $request, Post $post)
     {
-        // Récupérer les utilisateurs qui ont aimé le post avec leurs informations
-        $likes = $post->likes()
-            ->with('user:id,name,profile_image')
-            ->latest()
-            ->get()
-            ->map(function ($like) {
-                return [
-                    'id' => $like->user->id,
-                    'name' => $like->user->name,
-                    'profile_image' => $like->user->profile_image,
-                    'profile_image_url' => $like->user->profile_image
-                        ? Storage::url($like->user->profile_image)
-                        : null,
-                    'liked_at' => $like->created_at->diffForHumans(),
-                    'is_following' => Auth::user()->following()->where('following_id', $like->user->id)->exists()
-                ];
-            });
+        try {
+            // Récupérer les utilisateurs qui ont aimé le post avec leurs informations
+            $likes = $post->likes()
+                ->with('user:id,name,profile_image')
+                ->latest()
+                ->get()
+                ->map(function ($like) {
+                    return [
+                        'id' => $like->user->id,
+                        'name' => $like->user->name,
+                        'profile_image' => $like->user->profile_image,
+                        'profile_image_url' => $like->user->profile_image
+                            ? Storage::url($like->user->profile_image)
+                            : null,
+                        'liked_at' => $like->created_at->diffForHumans(),
+                        'is_following' => Auth::user()->following()->where('following_id', $like->user->id)->exists()
+                    ];
+                });
 
-        if ($request->wantsJson() || $request->ajax()) {
+            // Toujours retourner du JSON pour cette route
             return response()->json([
                 'success' => true,
                 'likes' => $likes,
                 'total' => $likes->count()
             ]);
-        }
 
-        return response()->json(['error' => 'Invalid request'], 400);
+        } catch (\Exception $e) {
+            \Log::error('Error in getLikes: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'error' => 'Server error: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function destroyComment(Request $request, Post $post, Comment $comment)

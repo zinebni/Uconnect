@@ -34,20 +34,32 @@ class ProfileController extends Controller
             $request->user()->email_verified_at = null;
         }
 
+        $imageUpdated = false;
+        $newImageUrl = null;
+
         if ($request->hasFile('profile_image')) {
             // Supprimer l'ancienne image si elle existe
             if ($request->user()->profile_image) {
-                Storage::delete($request->user()->profile_image);
+                Storage::disk('public')->delete($request->user()->profile_image);
             }
 
             // Stocker la nouvelle image
             $path = $request->file('profile_image')->store('profile-images', 'public');
             $request->user()->profile_image = $path;
+            $imageUpdated = true;
+            $newImageUrl = Storage::url($path);
         }
 
         $request->user()->save();
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        $message = 'profile-updated';
+        if ($imageUpdated) {
+            $message = 'profile-updated-with-image';
+        }
+
+        return Redirect::route('profile.edit')
+            ->with('status', $message)
+            ->with('new_image_url', $newImageUrl);
     }
 
     /**
@@ -77,7 +89,20 @@ class ProfileController extends Controller
     public function show(User $user): View
     {
         $posts = $user->posts()
-            ->with(['user', 'likes', 'comments.user'])
+            ->with([
+                'user',
+                'likes',
+                'comments' => function($query) {
+                    $query->whereNull('parent_id') // Seulement les commentaires principaux
+                          ->with([
+                              'user',
+                              'likes',
+                              'replies.user',
+                              'replies.likes'
+                          ])
+                          ->latest();
+                }
+            ])
             ->latest()
             ->paginate(10);
 

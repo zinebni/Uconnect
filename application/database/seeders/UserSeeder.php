@@ -40,6 +40,67 @@ class UserSeeder extends Seeder
                 'email' => 'lucas@example.com',
                 'password' => Hash::make('password'),
             ],
+            // 10 utilisateurs ajoutés
+            [
+                'name' => 'Emma Wilson',
+                'email' => 'emma@example.com',
+                'password' => Hash::make('password'),
+            ],
+            [
+                'name' => 'Youssef El Amrani',
+                'email' => 'youssef@example.com',
+                'password' => Hash::make('password'),
+            ],
+            [
+                'name' => 'Chloe Nguyen',
+                'email' => 'chloe@example.com',
+                'password' => Hash::make('password'),
+            ],
+            [
+                'name' => 'Mohamed Zaki',
+                'email' => 'mohamed@example.com',
+                'password' => Hash::make('password'),
+            ],
+            [
+                'name' => 'Lina Haddad',
+                'email' => 'lina@example.com',
+                'password' => Hash::make('password'),
+            ],
+            [
+                'name' => 'Ali Mansour',
+                'email' => 'ali@example.com',
+                'password' => Hash::make('password'),
+            ],
+            [
+                'name' => 'Sara Bouchra',
+                'email' => 'sara@example.com',
+                'password' => Hash::make('password'),
+            ],
+            [
+                'name' => 'David Brown',
+                'email' => 'david@example.com',
+                'password' => Hash::make('password'),
+            ],
+            [
+                'name' => 'Fatima Zahra',
+                'email' => 'fatima@example.com',
+                'password' => Hash::make('password'),
+            ],
+            [
+                'name' => 'Fatima Zahra',
+                'email' => 'fatima1010@example.com',
+                'password' => Hash::make('password'),
+            ],
+            [
+                'name' => 'Omar Khalil',
+                'email' => 'omar@example.com',
+                'password' => Hash::make('password'),
+            ],
+            [
+                'name' => 'Omar Khalil',
+                'email' => 'omar123@example.com',
+                'password' => Hash::make('password'),
+            ]
         ];
 
         foreach ($users as $userData) {

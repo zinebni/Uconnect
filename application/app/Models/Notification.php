@@ -47,6 +47,33 @@ class Notification extends Model
     }
 
     /**
+     * Créer une notification de manière sécurisée (évite les doublons)
+     */
+    public static function createSafely($userId, $fromUserId, $type, $message, $data = null)
+    {
+        // Vérifier s'il existe déjà une notification similaire récente (dans les 5 dernières minutes)
+        $existingNotification = self::where('user_id', $userId)
+            ->where('from_user_id', $fromUserId)
+            ->where('type', $type)
+            ->where('created_at', '>=', now()->subMinutes(5))
+            ->first();
+
+        // Si une notification récente existe déjà, ne pas en créer une nouvelle
+        if ($existingNotification) {
+            return $existingNotification;
+        }
+
+        // Créer la nouvelle notification
+        return self::create([
+            'user_id' => $userId,
+            'from_user_id' => $fromUserId,
+            'type' => $type,
+            'message' => $message,
+            'data' => $data
+        ]);
+    }
+
+    /**
      * Marquer la notification comme lue
      */
     public function markAsRead(): void

@@ -45,6 +45,16 @@ Route::middleware('auth')->group(function () {
     Route::post('/posts/{post}/comments', [PostController::class, 'storeComment'])->name('posts.comments.store');
     Route::delete('/posts/{post}/comments/{comment}', [PostController::class, 'destroyComment'])->name('posts.comments.destroy');
 
+    // Route pour créer des commentaires et réponses avec support parent_id
+    Route::post('/posts/{post}/comments-with-replies', [App\Http\Controllers\CommentController::class, 'store'])->name('posts.comments.store-with-replies');
+
+    // Routes pour les likes de commentaires
+    Route::post('/comments/{comment}/like', [App\Http\Controllers\CommentLikeController::class, 'toggle'])->name('comments.like');
+    Route::get('/comments/{comment}/likes', [App\Http\Controllers\CommentLikeController::class, 'getLikes'])->name('comments.likes');
+
+    // Route pour supprimer un commentaire via AJAX
+    Route::delete('/comments/{comment}', [App\Http\Controllers\CommentController::class, 'destroyAjax'])->name('comments.destroy');
+
     // Routes pour la messagerie
     Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
     Route::get('/messages/{user}', [MessageController::class, 'show'])->name('messages.show');

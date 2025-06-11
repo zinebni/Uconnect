@@ -25,13 +25,13 @@ class CreateCommentNotification
             return;
         }
 
-        // Créer une notification pour le propriétaire du post
-        Notification::create([
-            'user_id' => $event->post->user_id,
-            'from_user_id' => $event->user->id,
-            'type' => Notification::TYPE_COMMENT,
-            'message' => $event->user->name . ' a commenté votre publication',
-            'data' => [
+        // Créer une notification pour le propriétaire du post de manière sécurisée
+        Notification::createSafely(
+            $event->post->user_id,
+            $event->user->id,
+            Notification::TYPE_COMMENT,
+            $event->user->name . ' a commenté votre publication',
+            [
                 'post_id' => (string)$event->post->id,
                 'comment_id' => (string)$event->comment->id,
                 'comment_content' => substr($event->comment->content, 0, 50) . '...',
@@ -39,6 +39,6 @@ class CreateCommentNotification
                 'commenter_name' => $event->user->name,
                 'commenter_profile_image' => $event->user->profile_image
             ]
-        ]);
+        );
     }
 }

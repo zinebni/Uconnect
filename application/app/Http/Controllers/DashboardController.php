@@ -19,7 +19,20 @@ class DashboardController extends Controller
 
         // Récupérer les posts de l'utilisateur avec toutes les relations
         $posts = $user->posts()
-            ->with(['user', 'likes.user', 'comments.user'])
+            ->with([
+                'user',
+                'likes.user',
+                'comments' => function($query) {
+                    $query->whereNull('parent_id') // Seulement les commentaires principaux
+                          ->with([
+                              'user',
+                              'likes',
+                              'replies.user',
+                              'replies.likes'
+                          ])
+                          ->latest();
+                }
+            ])
             ->latest()
             ->paginate(10);
 

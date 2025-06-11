@@ -14,7 +14,20 @@ class HomeController extends Controller
         $following_ids = Auth::user()->following()->pluck('users.id');
         $posts = Post::whereIn('user_id', $following_ids)
             ->orWhere('user_id', Auth::id())
-            ->with(['user', 'likes', 'comments.user'])
+            ->with([
+                'user',
+                'likes',
+                'comments' => function($query) {
+                    $query->whereNull('parent_id') // Seulement les commentaires principaux
+                          ->with([
+                              'user',
+                              'likes',
+                              'replies.user',
+                              'replies.likes'
+                          ])
+                          ->latest();
+                }
+            ])
             ->latest()
             ->paginate(10);
 

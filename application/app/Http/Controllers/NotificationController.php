@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Notification;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,7 +14,9 @@ class NotificationController extends Controller
      */
     public function index()
     {
-        $notifications = Auth::user()->notifications()
+        /** @var User $user */
+        $user = Auth::user();
+        $notifications = $user->notifications()
             ->with('fromUser')
             ->latest()
             ->paginate(20);
@@ -56,7 +59,9 @@ class NotificationController extends Controller
      */
     public function markAllAsRead()
     {
-        Auth::user()->unreadNotifications()->update(['is_read' => true]);
+        /** @var User $user */
+        $user = Auth::user();
+        $user->unreadNotifications()->update(['is_read' => true]);
 
         return response()->json(['success' => true]);
     }
@@ -66,7 +71,9 @@ class NotificationController extends Controller
      */
     public function destroyAll()
     {
-        Auth::user()->notifications()->delete();
+        /** @var User $user */
+        $user = Auth::user();
+        $user->notifications()->delete();
 
         return response()->json(['success' => true]);
     }
@@ -76,7 +83,9 @@ class NotificationController extends Controller
      */
     public function getUnread()
     {
-        $notifications = Auth::user()->unreadNotifications()
+        /** @var User $user */
+        $user = Auth::user();
+        $notifications = $user->unreadNotifications()
             ->with('fromUser')
             ->latest()
             ->limit(10)
