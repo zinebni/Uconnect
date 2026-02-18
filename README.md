@@ -30,7 +30,7 @@ L’architecture est modulaire et découplée, assurant maintenabilité, perform
 
 - **Laravel 10.x** – Framework principal avec architecture MVC
 - **Laravel Breeze** – Starter kit léger pour l’authentification (login, register, etc.)
-- **Laravel Queues + Redis** – Exécution des tâches en arrière-plan (notifications, envoi de mails)
+- **Laravel Queues ** – Exécution des tâches en arrière-plan (notifications, envoi de mails)
 - **Pusher (WebSocket)** – Notifications et messagerie en temps réel
 
 ### 🎨 Frontend
@@ -43,8 +43,6 @@ L’architecture est modulaire et découplée, assurant maintenabilité, perform
 ### 🗄️ Base de données & Cache
 
 - **MySQL** – Stockage des données utilisateurs, posts, messages, etc.
-- **Redis** – Cache haute performance + support pour les queues Laravel
-
 ---
 
 ## ⚙️ Environnement de Développement
@@ -53,7 +51,6 @@ L’architecture est modulaire et découplée, assurant maintenabilité, perform
 - Composer  
 - Node.js & NPM  
 - MySQL  
-- Redis  
 - Laravel 10.x  
 - Laravel Breeze  
 - Pusher  
